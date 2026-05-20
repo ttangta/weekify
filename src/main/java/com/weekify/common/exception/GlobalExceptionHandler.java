@@ -2,23 +2,105 @@ package com.weekify.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Comparator;
+import java.util.List;
+
+// GlobalExceptionHandler에 @ExceptionHandler 기반의 예외 헨들러 메서드를 정의하며, 발생한 예외를 공통 ErrorResponse 형식으로 변환한다.
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            IllegalStateException e
+    // BusinessException을 처리하는 예외 핸들러 메서드
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            BusinessException e
     ){
-        ErrorResponse response = new ErrorResponse(
-                "INVALID_REQUEST",
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse response = ErrorResponse.of(
+                errorCode,
                 e.getMessage()
+        );
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(response);
+    }
+
+    /*
+    MethodArgumentNotValidException 예외 핸들러 메서드 별도 작성
+    DTO의 유효성 검증 실패는 직접 작성하여 던지는 BusinessException이 아니라, Spring이 자동으로 발생시키는 MethodArgumentNotValidException 이기 때문
+    MethodArgumentNotValidException은 BusinessException의 자식이 아님
+
+    MethodArgumentNotValidException은 메시지를 꺼내는 방식도 다름
+    검증 실패 메시지가 BindingResult 내에 들어가 있다 -> 응답 메시지를 제대로 내려주려면 별도의 예외 핸들러 메서드 필요
+
+    JSON 파싱 성공 -> DTO 객체 생성 성공 -> @Valid 검증 실패 = MethodArgumentNotValidException
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e
+    ){
+        String objectName = e.getBindingResult().getObjectName();
+
+        // 해당 예외 헨들러 메서드 발생 시 요청 DTO 이름에 따라 다른 필드 순서를 적용
+        List<String> fieldOrder = switch(objectName){
+            case "signUpRequest" -> List.of(
+                    "email",
+                    "password",
+                    "name",
+                    "tel",
+                    "birthDate",
+                    "address"
+            );
+            default -> List.of();
+        };
+
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .sorted(Comparator.comparing(error -> {
+                    int index = fieldOrder.indexOf(error.getField());
+                    return index == -1 ? Integer.MAX_VALUE : index;
+                }))
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse(ErrorCode.INVALID_REQUEST.getMessage());
+
+        ErrorResponse response = ErrorResponse.of(
+                ErrorCode.INVALID_REQUEST,
+                message
         );
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+    }
+
+    /*
+    JSON 형식 자체가 잘못된 경우는 별도의 예외 핸들러 메서드 작성 필요 : @Valid 검증 실패와 JSON 파싱 실패가 발셍하는 단계가 다름
+    잘못된 JSON 형식
+    -> DTO 객체 생성 자체가 실패
+    -> @Valid 검증까지 도달하지 못함
+    -> HttpMessageNotReadableException 발생
+    즉, 예외 타입이 다르기 때문에 핸들러도 분리
+
+    JSON 파싱 실패 또는 DTO 변환 실패 -> SignUpRequest 객체 생성 실패(@Valid 실행 불가) = HttpMessageNotReadableException
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+        HttpMessageNotReadableException ex
+    ){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(
+                        ErrorCode.INVALID_REQUEST,
+                        "요청 본문 형식이 올바르지 않습니다."
+                ));
     }
 }

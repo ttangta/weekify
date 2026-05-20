@@ -4,4 +4,19 @@ public record ErrorResponse(
         String code,
         String message
 ) {
+    // from(ErrorCode) : ErrorCode에 정의된 기본 메시지 그대로 사용
+    public static ErrorResponse from(ErrorCode errorCode){
+        return new ErrorResponse(
+                errorCode.getCode(),
+                errorCode.getMessage()
+        );
+    }
+
+    // of(ErrorCode, message) : ErrorCode의 code는 유지하고, message만 지정
+    public static ErrorResponse of(ErrorCode errorCode, String message){
+        return new ErrorResponse(
+                errorCode.getCode(),
+                message
+        );
+    }
 }
