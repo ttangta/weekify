@@ -3,6 +3,7 @@ package com.weekify.auth.service;
 import com.weekify.auth.dto.SignUpRequest;
 import com.weekify.auth.dto.SignUpResponse;
 import com.weekify.auth.dto.UserSummaryResponse;
+import com.weekify.auth.exception.DuplicatedEmailException;
 import com.weekify.auth.jwt.JwtTokenProvider;
 import com.weekify.user.entity.User;
 import com.weekify.user.entity.UserCredential;
@@ -28,7 +29,7 @@ public class AuthService {
     @Transactional
     public SignUpResponse signUp(SignUpRequest request){
         if(userRepository.existsByEmail(request.email())){
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new DuplicatedEmailException();
         }
         String passwordHash = passwordEncoder.encode(request.password());
 
