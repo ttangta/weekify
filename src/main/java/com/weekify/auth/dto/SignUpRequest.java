@@ -1,5 +1,6 @@
 package com.weekify.auth.dto;
 
+import com.weekify.common.validation.ValidPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ public record SignUpRequest(
         String email,
 
         @NotBlank(message = "비밀번호는 필수입니다.")
-        @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다.")
+        @ValidPassword
         String password,
 
         @NotBlank(message = "이름은 필수입니다.")
