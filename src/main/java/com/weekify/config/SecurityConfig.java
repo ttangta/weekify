@@ -22,7 +22,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/auth/signup"
+                                "/open-api/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
