@@ -23,7 +23,8 @@ public record SignUpRequest(
         @NotBlank(message = "전화번호는 필수입니다.")
         String tel,
 
-        @NotNull(message = "생년월인은 필수입니다.")
+        // 2026-05-21 리뷰 오타 수정
+        @NotNull(message = "생년월일은 필수입니다.")
         LocalDate birthDate,
 
         @NotBlank(message = "주소는 필수입니다.")
