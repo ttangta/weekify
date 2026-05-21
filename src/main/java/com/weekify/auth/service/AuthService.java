@@ -51,8 +51,7 @@ public class AuthService {
 
         // Jwt accessToken 생성
         String accessToken = jwtTokenProvider.createAccessToken(
-                savedUser.getId(),
-                savedUser.getEmail()
+                savedUser.getId()
         );
 
         // 회원가입 성공 응답 반환
