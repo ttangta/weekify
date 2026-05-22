@@ -42,44 +42,31 @@ public class GlobalExceptionHandler {
 
     JSON 파싱 성공 -> DTO 객체 생성 성공 -> @Valid 검증 실패 = MethodArgumentNotValidException
      */
+    /*
+    전역 예외 처리기는 MethodArgumentNotValidException에서 모든 FieldError를 꺼내 FieldErrorResponse 목록으로 변환한 뒤, ErrorResponse의 errors 필드에 담아 클라이언트에게 반환
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e
     ){
-        String objectName = e.getBindingResult().getObjectName();
-
-        // 해당 예외 헨들러 메서드 발생 시 요청 DTO 이름에 따라 다른 필드 순서를 적용
-        List<String> fieldOrder = switch(objectName){
-            case "signUpRequest" -> List.of(
-                    "email",
-                    "password",
-                    "name",
-                    "tel",
-                    "birthDate",
-                    "address"
-            );
-            default -> List.of();
-        };
-
-        String message = e.getBindingResult()
+        List<FieldErrorResponse> errors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .sorted(Comparator.comparing(error -> {
-                    int index = fieldOrder.indexOf(error.getField());
-                    return index == -1 ? Integer.MAX_VALUE : index;
-                }))
-                .findFirst()
-                .map(FieldError::getDefaultMessage)
-                .orElse(ErrorCode.INVALID_REQUEST.getMessage());
+                .map(error -> new FieldErrorResponse(
+                        error.getField(),
+                        error.getDefaultMessage()
+                ))
+                .toList();
 
         ErrorResponse response = ErrorResponse.of(
                 ErrorCode.INVALID_REQUEST,
-                message
+                errors
         );
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+
     }
 
     /*
