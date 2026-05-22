@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Comparator;
 import java.util.List;
 
 // GlobalExceptionHandler에 @ExceptionHandler 기반의 예외 헨들러 메서드를 정의하며, 발생한 예외를 공통 ErrorResponse 형식으로 변환한다.
@@ -60,7 +59,7 @@ public class GlobalExceptionHandler {
                 .toList();
 
         ErrorResponse response = ErrorResponse.of(
-                ErrorCode.INVALID_REQUEST,
+                CommonErrorCode.INVALID_REQUEST,
                 errors
         );
 
@@ -87,7 +86,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of(
-                        ErrorCode.INVALID_REQUEST,
+                        CommonErrorCode.INVALID_REQUEST,
                         "요청 본문 형식이 올바르지 않습니다."
                 ));
     }
@@ -96,11 +95,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e){
         log.error("Unhandled exception occurred", e);
 
-        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
-        ErrorResponse response = ErrorResponse.from(errorCode);
+        CommonErrorCode commonErrorCode = CommonErrorCode.UNKNOWN_ERROR;
+        ErrorResponse response = ErrorResponse.from(commonErrorCode);
 
         return ResponseEntity
-                .status(errorCode.getStatus())
+                .status(commonErrorCode.getStatus())
                 .body(response);
     }
 }

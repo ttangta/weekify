@@ -1,5 +1,6 @@
 package com.weekify.common.exception;
 
+
 import lombok.Getter;
 
 // 서비스 로직에서 의도적으로 발생시키는 비즈니스 예외의 공통 부모
