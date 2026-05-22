@@ -1,9 +1,8 @@
 package com.weekify.auth.service;
 
-import com.weekify.auth.dto.SignUpRequest;
-import com.weekify.auth.dto.SignUpResponse;
-import com.weekify.auth.dto.UserSummaryResponse;
+import com.weekify.auth.dto.*;
 import com.weekify.auth.exception.DuplicatedEmailException;
+import com.weekify.auth.exception.LoginFailedException;
 import com.weekify.auth.jwt.JwtTokenProvider;
 import com.weekify.user.entity.User;
 import com.weekify.user.entity.UserCredential;
@@ -57,11 +56,30 @@ public class AuthService {
         // 회원가입 성공 응답 반환
         return SignUpResponse.of(accessToken,
                 jwtTokenProvider.getAccessTokenExpirationSeconds(),
-                new UserSummaryResponse(
-                        savedUser.getId(),
-                        savedUser.getEmail(),
-                        savedUser.getName()
-                )
+                UserSummaryResponse.from(savedUser)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request){
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(LoginFailedException::new);
+
+        UserCredential userCredential = userCredentialRepository.findByUserId(user.getId())
+                .orElseThrow(LoginFailedException::new);
+
+        if(!passwordEncoder.matches(request.password(), userCredential.getPasswordHash())){
+            throw new LoginFailedException();
+        }
+
+        String accessToken = jwtTokenProvider.createAccessToken(
+                user.getId()
+        );
+
+        return LoginResponse.of(
+                accessToken,
+                jwtTokenProvider.getAccessTokenExpirationSeconds(),
+                UserSummaryResponse.from(user)
         );
     }
 }

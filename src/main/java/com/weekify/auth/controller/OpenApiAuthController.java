@@ -1,5 +1,7 @@
 package com.weekify.auth.controller;
 
+import com.weekify.auth.dto.LoginRequest;
+import com.weekify.auth.dto.LoginResponse;
 import com.weekify.auth.dto.SignUpRequest;
 import com.weekify.auth.dto.SignUpResponse;
 import com.weekify.auth.service.AuthService;
@@ -35,8 +37,21 @@ public class OpenApiAuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/test/unknown_error")
-    public void testUnknownError(){
-        throw new RuntimeException("테스트용 예상하지 못한 예외");
+    @PostMapping("/login")
+    @Operation(
+            summary = "로그인",
+            description = "이메일과 비밀번호로 로그인하고 엑세스 토큰을 발급합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 유효성 검증 실패 또는 잘못된 요청 본문"),
+            @ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호 불일치")
+    })
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request
+    ){
+        LoginResponse response = authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }
