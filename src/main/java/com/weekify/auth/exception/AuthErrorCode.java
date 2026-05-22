@@ -10,6 +10,12 @@ public enum AuthErrorCode implements ErrorCode {
             HttpStatus.CONFLICT,
             "DUPLICATED_EMAIL",
             "이미 가입된 이메일입니다."
+    ),
+
+    INVALID_LOGIN_CREDENTIALS(
+            HttpStatus.UNAUTHORIZED,
+            "INVALID_LOGIN_CREDENTIALS",
+            "이메일 또는 비밀번호가 올바르지 않습니다."
     );
 
     private final HttpStatus status;
