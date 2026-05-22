@@ -1,9 +1,9 @@
 package com.weekify.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 // GlobalExceptionHandler에 @ExceptionHandler 기반의 예외 헨들러 메서드를 정의하며, 발생한 예외를 공통 ErrorResponse 형식으로 변환한다.
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -89,5 +90,17 @@ public class GlobalExceptionHandler {
                         ErrorCode.INVALID_REQUEST,
                         "요청 본문 형식이 올바르지 않습니다."
                 ));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e){
+        log.error("Unhandled exception occurred", e);
+
+        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        ErrorResponse response = ErrorResponse.from(errorCode);
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(response);
     }
 }
