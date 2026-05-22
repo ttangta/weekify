@@ -1,6 +1,7 @@
 package com.weekify.auth.dto;
 
 import com.weekify.common.validation.ValidPassword;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,12 @@ public record SignUpRequest(
         @NotNull(message = "생년월일은 필수입니다.")
         LocalDate birthDate,
 
+        @Schema(
+                description = "주소",
+                example = "서울시 강남구",
+                nullable = false,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @NotBlank(message = "주소는 필수입니다.")
         String address,
 
