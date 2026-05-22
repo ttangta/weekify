@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/open-api/auth")
-public class AuthController {
+public class OpenApiAuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
@@ -33,5 +33,10 @@ public class AuthController {
     ){
         SignUpResponse response = authService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/test/unknown_error")
+    public void testUnknownError(){
+        throw new RuntimeException("테스트용 예상하지 못한 예외");
     }
 }
