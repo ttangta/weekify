@@ -1,18 +1,29 @@
 package com.weekify.auth.dto;
 
+import com.weekify.auth.jwt.JwtToken;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record SignUpResponse(
+        @Schema(
+                description = "엑세스 토큰. Authorization 헤더에 Bearer {accessToken} 형식으로 사용합니다."
+        )
         String accessToken,
-        String tokenType,
+
+        @Schema(
+                description = "엑세스 토큰 만료 시간(초)", example = "3600"
+        )
         long expiresIn,
+
+        @Schema(description = "회원가입 사용자 정보")
         UserSummaryResponse user
 ) {
-    public static SignUpResponse of(String accessToken,
-                                    long expiresIn,
-                                    UserSummaryResponse user){
+    public static SignUpResponse of(
+            JwtToken jwtToken,
+            UserSummaryResponse user
+    ){
         return new SignUpResponse(
-                accessToken,
-                "Bearer",
-                expiresIn,
+                jwtToken.accessToken(),
+                jwtToken.expiresIn(),
                 user
         );
     }

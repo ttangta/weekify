@@ -1,9 +1,9 @@
 package com.weekify.auth.exception;
 
-import com.weekify.common.exception.BusinessException;
+import com.weekify.common.exception.BaseException;
 
 // 회원가입 시 이메일 중복 상황을 표현하는 구체적인 예외
-public class DuplicatedEmailException extends BusinessException {
+public class DuplicatedEmailException extends BaseException {
 
     public DuplicatedEmailException(){
         // 409 CONFLICT + DUPLICATED_EMAIL + 기본 메시지 보유
