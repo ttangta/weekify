@@ -21,8 +21,7 @@ public class JwtTokenProvider {
         );
     }
 
-    // Access Token을 생성하는 메서드
-    public String createAccessToken(Long userId){
+    private String createAccessToken(Long userId){
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtProperties.accessTokenExpiration());
 
@@ -32,6 +31,15 @@ public class JwtTokenProvider {
                 .expiration(expiration)
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public JwtToken createToken(Long userId){
+        String accessToken = createAccessToken(userId);
+
+        return JwtToken.of(
+                accessToken,
+                getAccessTokenExpirationSeconds()
+        );
     }
 
     // JWT 생성용이 아닌 응답 DTO를 채우기 위한 용도의 메서드

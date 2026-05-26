@@ -11,7 +11,8 @@ public enum AuthErrorCode implements ErrorCode {
             "DUPLICATED_EMAIL",
             "이미 가입된 이메일입니다."
     ),
-
+    // 로그인 실패 시 이메일 존재 여부나 비밀번호 불일치 여부가 노출되지 않도록 INVALID_LOGIN_CREDENTIALS 하나로 통합해서 처리하는 현재 방식이 적절하다고 판단
+    // "이메일 또는 비밀번호가 올바르지 않습니다." 메시지 유지 -> DTO validation 실페는 별도로 필드별 에러 메시지를 내려주는 방식으로 구분
     INVALID_LOGIN_CREDENTIALS(
             HttpStatus.UNAUTHORIZED,
             "INVALID_LOGIN_CREDENTIALS",

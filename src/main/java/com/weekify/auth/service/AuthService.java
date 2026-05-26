@@ -3,6 +3,7 @@ package com.weekify.auth.service;
 import com.weekify.auth.dto.*;
 import com.weekify.auth.exception.DuplicatedEmailException;
 import com.weekify.auth.exception.LoginFailedException;
+import com.weekify.auth.jwt.JwtToken;
 import com.weekify.auth.jwt.JwtTokenProvider;
 import com.weekify.user.entity.User;
 import com.weekify.user.entity.UserCredential;
@@ -48,14 +49,11 @@ public class AuthService {
         UserCredential userCredential = UserCredential.create(savedUser, passwordHash);
         userCredentialRepository.save(userCredential);
 
-        // Jwt accessToken 생성
-        String accessToken = jwtTokenProvider.createAccessToken(
-                savedUser.getId()
-        );
+        JwtToken jwtToken = jwtTokenProvider.createToken(savedUser.getId());
 
         // 회원가입 성공 응답 반환
-        return SignUpResponse.of(accessToken,
-                jwtTokenProvider.getAccessTokenExpirationSeconds(),
+        return SignUpResponse.of(
+                jwtToken,
                 UserSummaryResponse.from(savedUser)
         );
     }
@@ -72,13 +70,10 @@ public class AuthService {
             throw new LoginFailedException();
         }
 
-        String accessToken = jwtTokenProvider.createAccessToken(
-                user.getId()
-        );
+        JwtToken jwtToken = jwtTokenProvider.createToken(user.getId());
 
         return LoginResponse.of(
-                accessToken,
-                jwtTokenProvider.getAccessTokenExpirationSeconds(),
+                jwtToken,
                 UserSummaryResponse.from(user)
         );
     }

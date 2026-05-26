@@ -16,9 +16,9 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     // BusinessException을 처리하는 예외 핸들러 메서드
-    @ExceptionHandler(BusinessException.class)
+    @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
-            BusinessException e
+            BaseException e
     ){
         ErrorCode errorCode = e.getErrorCode();
 
