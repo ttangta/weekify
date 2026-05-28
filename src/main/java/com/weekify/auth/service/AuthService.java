@@ -77,4 +77,5 @@ public class AuthService {
                 UserSummaryResponse.from(user)
         );
     }
+
 }

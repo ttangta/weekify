@@ -1,9 +1,6 @@
 package com.weekify.auth.controller;
 
-import com.weekify.auth.dto.LoginRequest;
-import com.weekify.auth.dto.LoginResponse;
-import com.weekify.auth.dto.SignUpRequest;
-import com.weekify.auth.dto.SignUpResponse;
+import com.weekify.auth.dto.*;
 import com.weekify.auth.service.AuthService;
 import com.weekify.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,4 +51,5 @@ public class OpenApiAuthController {
 
         return ResponseEntity.ok(response);
     }
+
 }
