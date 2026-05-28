@@ -3,6 +3,7 @@ package com.weekify.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weekify.auth.dto.*;
 import com.weekify.auth.service.AuthService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ class AuthControllerTest {
 
         LoginResponse response = new LoginResponse(
                 "access-token",
+                "refresh-token",
                 3600L,
                 user
         );
@@ -71,6 +73,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
@@ -98,6 +101,7 @@ class AuthControllerTest {
 
         SignUpResponse response = new SignUpResponse(
                 "access-token",
+                "refresh-token",
                 3600L,
                 user
         );
@@ -111,6 +115,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
