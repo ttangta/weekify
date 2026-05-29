@@ -1,5 +1,7 @@
 package com.weekify.auth.jwt;
 
+import com.weekify.auth.dto.RefreshTokenClaims;
+import com.weekify.auth.exception.InvalidRefreshTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -10,15 +12,14 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtTokenProviderTest {
-
+    private static final String secret = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
+    private static final long accessTokenExpiration = 3600000L;
+    private static final long refreshTokenExpiration = 1209600000L;
     @Test @DisplayName("Access Token과 Refresh Token 생성 + JWT 형식 검증 + 두 값이 서로 다른지 검증 + 각 JWT의 payload 검증")
     void jwtTokenClaimsCheck() {
-        String secret = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
-        long accessTokenExpiration = 3600000L;
-        long refreshTokenExpiration = 1209600000L;
-
         JwtProperties jwtProperties =
                 new JwtProperties(secret, accessTokenExpiration, refreshTokenExpiration);
 
@@ -56,6 +57,8 @@ class JwtTokenProviderTest {
                         .parseSignedClaims(jwtToken.accessToken())
                         .getPayload();
         assertThat(accessClaims.getSubject()).isEqualTo(String.valueOf(userId));
+        assertThat(accessClaims.get("type", String.class))
+                .isEqualTo("ACCESS");
         assertThat(accessClaims.getIssuedAt()).isNotNull();
         assertThat(accessClaims.getExpiration()).isNotNull();
         assertThat(accessClaims.getExpiration()).isAfter(accessClaims.getIssuedAt());
@@ -81,6 +84,8 @@ class JwtTokenProviderTest {
                         .parseSignedClaims(jwtToken.refreshToken())
                         .getPayload();
         assertThat(refreshClaims.getSubject()).isEqualTo(String.valueOf(userId));
+        assertThat(refreshClaims.get("type", String.class))
+                .isEqualTo("REFRESH");
         assertThat(refreshClaims.getIssuedAt()).isNotNull();
         assertThat(refreshClaims.getExpiration()).isNotNull();
         assertThat(refreshClaims.getExpiration()).isAfter(refreshClaims.getIssuedAt());
@@ -95,5 +100,42 @@ class JwtTokenProviderTest {
                         refreshTokenExpiration / 1000 - 1,
                         refreshTokenExpiration / 1000 + 1
                 );
+    }
+
+    @Test @DisplayName("refreshToken을 파싱하면 userId와 jti를 추출한다.")
+    void parseRefreshToken(){
+        // given
+        JwtProperties jwtProperties =
+                new JwtProperties(secret, accessTokenExpiration, refreshTokenExpiration);
+
+        JwtTokenProvider jwtTokenProvider =
+                new JwtTokenProvider(jwtProperties);
+
+        Long userId = 1L;
+        JwtToken jwtToken = jwtTokenProvider.createToken(userId);
+
+        // when
+        RefreshTokenClaims claims =
+                jwtTokenProvider.parseRefreshToken(jwtToken.refreshToken());
+
+        // then
+        assertThat(claims.userId()).isEqualTo(userId);
+        assertThat(claims.jti()).isNotBlank();
+    }
+
+    @Test @DisplayName("accessToken을 refreshToken으로 파싱하면 예외가 발생한다.")
+    void parseRefreshTokenWithAccessToken(){
+        JwtProperties jwtProperties =
+                new JwtProperties(secret, accessTokenExpiration, refreshTokenExpiration);
+
+        JwtTokenProvider jwtTokenProvider =
+                new JwtTokenProvider(jwtProperties);
+
+        Long userId = 1L;
+        JwtToken jwtToken = jwtTokenProvider.createToken(userId);
+
+        // when & then
+        assertThatThrownBy(() -> jwtTokenProvider.parseRefreshToken(jwtToken.accessToken()))
+                .isInstanceOf(InvalidRefreshTokenException.class);
     }
 }
