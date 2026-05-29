@@ -52,4 +52,19 @@ public class OpenApiAuthController {
         return ResponseEntity.ok(response);
     }
 
+
+    /*
+     * AuthController.reissue()
+     * - POST /open-api/auth/reissue 요청을 받는다.
+     * - 요청 바디를 TokenReissueRequest로 변환한다.
+     * - @Valid로 refreshToken 누락/빈 문자열을 검증한다.
+     * - 실제 재발급 로직은 AuthService.reissue()에 위임한다.
+     * - 성공 시 200 OK와 TokenReissueResponse를 변환한다.
+     */
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenReissueResponse> reissue(
+            @Valid @RequestBody TokenReissueRequest request
+    ){
+        return ResponseEntity.ok(authService.reissue(request));
+    }
 }

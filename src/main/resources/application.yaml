@@ -16,8 +16,11 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
   flyway:
     enabled: true
-
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration: 3600000
-  refresh-token-expiration: 1209600000
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
