@@ -3,6 +3,7 @@ package com.weekify.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weekify.auth.dto.*;
 import com.weekify.auth.service.AuthService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ class AuthControllerTest {
 
         LoginResponse response = new LoginResponse(
                 "access-token",
+                "refresh-token",
                 3600L,
                 user
         );
@@ -71,6 +73,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
@@ -98,6 +101,7 @@ class AuthControllerTest {
 
         SignUpResponse response = new SignUpResponse(
                 "access-token",
+                "refresh-token",
                 3600L,
                 user
         );
@@ -111,8 +115,73 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
     }
+
+    @Test @DisplayName("토큰 재발급 성공 시 accessToken, refreshToken, expiresIn을 반환한다")
+    void reissue_success() throws Exception{
+        // given
+        TokenReissueRequest request = new TokenReissueRequest("refresh-token");
+
+        TokenReissueResponse response = new TokenReissueResponse(
+            "new-access-token",
+            "new-refresh-token",
+                3600
+        );
+        given(authService.reissue(any(TokenReissueRequest.class)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/open-api/auth/reissue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
+                .andExpect(jsonPath("$.expiresIn").value(3600));
+    }
+
+    @Test @DisplayName("refreshToken 필드가 누락되면 400을 반환한다")
+    void reissue_missing_refreshToken() throws Exception{
+        mockMvc.perform(post("/open-api/auth/reissue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.errors[0].field").value("refreshToken"));
+    }
+
+    @Test @DisplayName("refreshToken이 빈 문자열이면 400을 반환한다")
+    void reissue_blank_refreshToken() throws Exception{
+        mockMvc.perform(post("/open-api/auth/reissue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "refreshToken": ""
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.errors[0].field").value("refreshToken"));
+    }
+
+    @Test @DisplayName("refreshToken이 공백 문자열이면 400을 반환한다")
+    void reissue_whitespace_refreshToken() throws Exception{
+        mockMvc.perform(post("/open-api/auth/reissue")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "refreshToken": "   "
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.errors[0].field").value("refreshToken"));
+    }
+
+
+
 }
