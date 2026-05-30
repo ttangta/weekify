@@ -13,14 +13,12 @@ expiresIn : 남은 유효 시간(duration)
  */
 public record JwtToken(
         String accessToken,
-        String refreshToken,
-        long expiresIn
+        String refreshToken
 ) {
-    public static JwtToken of(String accessToken, String refreshToken, long expiresIn){
+    public static JwtToken of(String accessToken, String refreshToken){
         return new JwtToken(
                 accessToken,
-                refreshToken,
-                expiresIn
+                refreshToken
         );
     }
 }

@@ -38,8 +38,7 @@ public class JwtTokenProvider {
 
         return JwtToken.of(
                 accessToken,
-                refreshToken,
-                getAccessTokenExpirationSeconds()
+                refreshToken
         );
     }
 

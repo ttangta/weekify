@@ -11,17 +11,13 @@ public record TokenReissueResponse(
 
         // 새로 발급된 refreshToken, 기존 refreshToken은 재발급 과정에서 폐기
         @Schema(description = "새로 발급된 리프레시 토큰")
-        String refreshToken,
+        String refreshToken
 
-        // 새 accessToken의 만료 시간, 현재 프로젝트 기준 초 단위
-        @Schema(description = "엑세스 토큰 만료 시간(초)")
-        long expiresIn
 ) {
     public static TokenReissueResponse of(JwtToken jwtToken){
         return new TokenReissueResponse(
                 jwtToken.accessToken(),
-                jwtToken.refreshToken(),
-                jwtToken.expiresIn()
+                jwtToken.refreshToken()
         );
     }
 }
