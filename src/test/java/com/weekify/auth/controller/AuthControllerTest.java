@@ -60,7 +60,6 @@ class AuthControllerTest {
         LoginResponse response = new LoginResponse(
                 "access-token",
                 "refresh-token",
-                3600L,
                 user
         );
 
@@ -74,7 +73,6 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
-                .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
 
@@ -102,7 +100,6 @@ class AuthControllerTest {
         SignUpResponse response = new SignUpResponse(
                 "access-token",
                 "refresh-token",
-                3600L,
                 user
         );
 
@@ -116,7 +113,6 @@ class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
-                .andExpect(jsonPath("$.expiresIn").value(3600))
                 .andExpect(jsonPath("$.user").exists())
                 .andExpect(jsonPath("$.tokenType").doesNotExist());
     }
@@ -128,8 +124,7 @@ class AuthControllerTest {
 
         TokenReissueResponse response = new TokenReissueResponse(
             "new-access-token",
-            "new-refresh-token",
-                3600
+            "new-refresh-token"
         );
         given(authService.reissue(any(TokenReissueRequest.class)))
                 .willReturn(response);
@@ -140,8 +135,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("new-access-token"))
-                .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
-                .andExpect(jsonPath("$.expiresIn").value(3600));
+                .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"));
     }
 
     @Test @DisplayName("refreshToken 필드가 누락되면 400을 반환한다")

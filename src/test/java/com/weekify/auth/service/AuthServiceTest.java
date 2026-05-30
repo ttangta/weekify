@@ -88,8 +88,7 @@ public class AuthServiceTest {
 
         JwtToken newJwtToken = new JwtToken(
                 "new-access-token",
-                "new-refresh-token",
-                3600
+                "new-refresh-token"
         );
 
         RefreshTokenClaims newClaims = new RefreshTokenClaims(userId, newJti);
@@ -120,7 +119,6 @@ public class AuthServiceTest {
         // then
         assertThat(response.accessToken()).isEqualTo("new-access-token");
         assertThat(response.refreshToken()).isEqualTo("new-refresh-token");
-        assertThat(response.expiresIn()).isEqualTo(3600);
 
         verify(refreshTokenStore).consume(oldJti, userId);
         verify(refreshTokenStore).save(newJti, userId, refreshTokenExpiration);
