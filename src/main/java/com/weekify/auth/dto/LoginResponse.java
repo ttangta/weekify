@@ -10,9 +10,6 @@ public record LoginResponse(
         @Schema(description = "리프레시 토큰. 엑세스 토큰 재발급 시 사용합니다.")
         String refreshToken,
 
-        @Schema(description = "엑세스 토큰 만료 시간(초)", example = "3600")
-        long expiresIn,
-
         @Schema(description = "로그인 사용자 정보")
         UserSummaryResponse user
 ) {
@@ -23,7 +20,6 @@ public record LoginResponse(
         return new LoginResponse(
                 jwtToken.accessToken(),
                 jwtToken.refreshToken(),
-                jwtToken.expiresIn(),
                 user
         );
     }

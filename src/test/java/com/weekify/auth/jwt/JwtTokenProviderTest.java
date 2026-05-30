@@ -41,9 +41,6 @@ class JwtTokenProviderTest {
         assertThat(jwtToken.accessToken())
                 .isNotEqualTo(jwtToken.refreshToken());
 
-        // 4. 생성된 jwtToken 객체 내 expiresIn 필드 존재 여부 검증
-        assertThat(jwtToken.expiresIn())
-                .isEqualTo(accessTokenExpiration/1000);
 
         // 5. accessToken 과 refreshToken의 Claims를 확인
         SecretKey secretKey =
